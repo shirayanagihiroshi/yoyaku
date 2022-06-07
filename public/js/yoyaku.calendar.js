@@ -144,7 +144,7 @@ yoyaku.calendar = (function () {
       if (reserveTarget == 0) {
         retval = '×';
       } else {
-        retval = '○';  
+        retval = '○';
       }
     }
 
@@ -152,9 +152,11 @@ yoyaku.calendar = (function () {
   }
 
   updateReserve = function () {
-    if (yoyaku.model.iskyouin()) {
+// 後から都合が悪くなって面談できなくなった場合は
+// 教員が自分で予約枠を埋めて、不可とするようにする。
+//    if (yoyaku.model.iskyouin()) {
 
-    } else {
+//    } else {
       if (stateMap.wakuID != 0) {
         let obj = {
           userId        : yoyaku.model.getMyID(),
@@ -163,17 +165,19 @@ yoyaku.calendar = (function () {
         }
         yoyaku.model.updateReserve(obj);
       }
-    }
+//    }
   }
 
   deleteReserve = function () {
-    if (yoyaku.model.iskyouin()) {
+    // 後から都合が悪くなって面談できなくなった場合は
+    // 教員が自分で予約枠を埋めて、不可とするようにする。
+//    if (yoyaku.model.iskyouin()) {
 
-    } else {
+//    } else {
       if (stateMap.wakuID != 0) {
         yoyaku.model.deleteReserve(stateMap.wakuID);
       }
-    }
+//    }
   }
 
   setNotice = function () {
@@ -261,6 +265,33 @@ yoyaku.calendar = (function () {
             };
 
       if (yoyaku.model.iskyouin()) {
+        // 予約が入っていないところのみ予約できる。
+        if (searchReserve(Number($(this).attr(configMap.propWakuID))) == '○') {
+          // 登録対象の枠IDを保持しておく
+          stateMap.wakuID = Number($(this).attr(configMap.propWakuID));
+          // ユーザに確認してから登録
+          $.gevent.publish('verifyUpdate', [{errStr:$(this).attr(configMap.propHi) + $(this).attr(configMap.propJi) + 'を予約しますか？'}]);
+
+        // 予約が入っているときは自分の予約ならキャンセル
+        } else {
+          let obj, f = function (reserveTarget, cls) {
+                         return function (target) {
+                           if ( target.reserveTarget == reserveTarget && target.cls == cls) {
+                             return true;
+                           } else {
+                             return false;
+                           }
+                         }
+                       };
+
+          obj = reserve.find(f(Number($(this).attr(configMap.propWakuID)), yoyaku.model.getMyCls()) )
+          if ( obj.userId == yoyaku.model.getMyID() ) {
+            // キャンセル対象の枠IDを保持しておく
+            stateMap.wakuID = Number($(this).attr(configMap.propWakuID));
+            // ユーザに確認してからキャンセル
+            $.gevent.publish('verifyCancel', [{errStr:$(this).attr(configMap.propHi) + $(this).attr(configMap.propJi) + 'の予約をキャンセルしますか？'}]);
+          }
+        }
 
       } else {
         idx = reserve.findIndex(f(yoyaku.model.getMyID()));

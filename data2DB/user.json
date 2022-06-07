@@ -37,10 +37,6 @@
 ,{"userId":"hnjh1a32", "userKind": 20, "name":"保護者32", "cls":"1a", "passWord":"testpass"}
 ,{"userId":"hnjh1a33", "userKind": 20, "name":"保護者33", "cls":"1a", "passWord":"testpass"}
 ,{"userId":"hnjh1a34", "userKind": 20, "name":"保護者34", "cls":"1a", "passWord":"testpass"}
-,{"userId":"dummy001", "userKind": 20, "name":"dummy001", "cls":"1a", "passWord":"testpass"}
-,{"userId":"dummy002", "userKind": 20, "name":"dummy002", "cls":"1a", "passWord":"testpass"}
-,{"userId":"dummy003", "userKind": 20, "name":"dummy003", "cls":"1a", "passWord":"testpass"}
-,{"userId":"dummy004", "userKind": 20, "name":"dummy004", "cls":"1a", "passWord":"testpass"}
 ,{"userId":"hnjh1b01", "userKind": 20, "name":"保護者35", "cls":"1b", "passWord":"testpass"}
 ,{"userId":"hnjh1b02", "userKind": 20, "name":"保護者36", "cls":"1b", "passWord":"testpass"}
 ,{"userId":"hnjh1b03", "userKind": 20, "name":"保護者37", "cls":"1b", "passWord":"testpass"}
