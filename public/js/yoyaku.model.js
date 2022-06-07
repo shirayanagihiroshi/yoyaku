@@ -8,7 +8,7 @@ yoyaku.model = (function () {
 
   var initModule, login, logout, islogind, getAKey,
       initLocal, iskyouin, getWaku, readyReserve, getReserve, updateReserve,
-      getMyID, getMyName, getMyCls, //関数
+      deleteReserve, getMyID, getMyName, getMyCls, //関数
       accessKey, userKind, cls, name, waku, reserve; //モジュールスコープ変数
 
   initLocal = function () {
@@ -74,6 +74,12 @@ yoyaku.model = (function () {
     yoyaku.data.registerReceive('updateReserveFailure', function (msg) {
       $.gevent.publish('updateReserveFailure', [{}]);
     });
+
+    // 削除結果
+    yoyaku.data.registerReceive('deleteReserveResult', function (msg) {
+      $.gevent.publish('deleteReserveResult', [{}]);
+    });
+
 
     yoyaku.data.registerReceive('logoutResult', function (msg) {
       let eventName;
@@ -148,8 +154,16 @@ yoyaku.model = (function () {
                     name          : reserveData.name,
                     reserveTarget : reserveData.reserveTarget,
                     cls           : cls};
-    console.log( queryObj );
+//    console.log( queryObj );
     yoyaku.data.sendToServer('updateReserve',queryObj);
+  }
+
+  deleteReserve = function ( reserveTarget ) {
+    let queryObj = {AKey          : accessKey,
+                    reserveTarget : reserveTarget,
+                    cls           : cls};
+//    console.log( queryObj );
+    yoyaku.data.sendToServer('deleteReserve',queryObj);
   }
 
   getMyID = function () {
@@ -179,6 +193,7 @@ yoyaku.model = (function () {
           getWaku          : getWaku,
           getReserve       : getReserve,
           updateReserve    : updateReserve,
+          deleteReserve    : deleteReserve,
           getMyID          : getMyID,
           getMyName        : getMyName,
           getMyCls         : getMyCls,

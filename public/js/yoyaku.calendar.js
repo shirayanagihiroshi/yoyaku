@@ -26,7 +26,7 @@ yoyaku.calendar = (function () {
       },
       jqueryMap = {},
       setJqueryMap, configModule, initModule, removeCalendar,
-      createTable, updateReserve, searchReserve,
+      createTable, updateReserve, deleteReserve, searchReserve,
 
       setNotice;
 
@@ -44,6 +44,9 @@ yoyaku.calendar = (function () {
 
 
   //---ユーティリティメソッド---
+  // テーブルの表示位置やサイズの調整は微妙。
+  // データの日付にスペースを入れないと、なぜか文字がはみ出る。
+  // スペースを入れると、改行がなされる模様。
   createTable = function () {
 
     let i, j, myclsWaku,
@@ -107,6 +110,7 @@ yoyaku.calendar = (function () {
     jqueryMap.$main.append(str);
   }
 
+  // 枠IDから予約者を引き当てる
   searchReserve = function (reserveTarget) {
     let retval, idx,
       reserve = yoyaku.model.getReserve(),
@@ -126,7 +130,13 @@ yoyaku.calendar = (function () {
       if (yoyaku.model.iskyouin()) {
         retval = reserve[idx].name;
       } else {
-        retval = '×';
+        // 自分だけは名前を表示
+        if (reserve[idx].userId == yoyaku.model.getMyID()) {
+          retval = reserve[idx].name;
+        // 自分以外
+        } else {
+          retval = '×';
+        }
       }
     } else {
       retval = '○';
@@ -146,6 +156,16 @@ yoyaku.calendar = (function () {
           reserveTarget : stateMap.wakuID
         }
         yoyaku.model.updateReserve(obj);
+      }
+    }
+  }
+
+  deleteReserve = function () {
+    if (yoyaku.model.iskyouin()) {
+
+    } else {
+      if (stateMap.wakuID != 0) {
+        yoyaku.model.deleteReserve(stateMap.wakuID);
       }
     }
   }
@@ -207,6 +227,15 @@ yoyaku.calendar = (function () {
             // ユーザに確認してから登録
             $.gevent.publish('verifyUpdate', [{errStr:$(this).attr(configMap.propHi) + $(this).attr(configMap.propJi) + 'を予約しますか？'}]);
           }
+
+        // 予約済の時は予約のキャンセルのみできる。
+        } else {
+          if (Number($(this).attr(configMap.propWakuID)) == reserve[idx].reserveTarget) {
+            // キャンセル対象の枠IDを保持しておく
+            stateMap.wakuID = Number($(this).attr(configMap.propWakuID));
+            // ユーザに確認してからキャンセル
+            $.gevent.publish('verifyCancel', [{errStr:$(this).attr(configMap.propHi) + $(this).attr(configMap.propJi) + 'の予約をキャンセルしますか？'}]);
+          }
         }
       }
     });
@@ -229,6 +258,7 @@ yoyaku.calendar = (function () {
     configModule  : configModule,
     initModule    : initModule,
     removeCalendar: removeCalendar,
-    updateReserve : updateReserve
+    updateReserve : updateReserve,
+    deleteReserve : deleteReserve
   };
 }());

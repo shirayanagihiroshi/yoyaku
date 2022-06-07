@@ -17,6 +17,7 @@ yoyaku.shell = (function () {
                        logout         : true,  // status : dialog のとき使用
                        invalid        : true,  // status : dialog のとき使用
                        verify         : true,  // status : dialog のとき使用
+                       verifydel      : true,  // status : dialog のとき使用
                        Updone         : true}  // status : dialog のとき使用
       }
       // アンカーマップとして許容される型を事前に指定するためのもの。
@@ -124,6 +125,12 @@ yoyaku.shell = (function () {
         yoyaku.dialogOkCancel.configModule({showStr : stateMap.errStr,
                                          okFunc  : yoyaku.model.readyReserve,
                                          ngFunc  : yoyaku.model.readyReserve});
+        yoyaku.dialogOkCancel.initModule( jqueryMap.$container );
+      } else if ( anchor_map._status.dialogKind == 'verifydel' ) {
+        setModal(true);
+        yoyaku.dialogOkCancel.configModule({showStr : stateMap.errStr,
+                                         okFunc  : yoyaku.calendar.deleteReserve,
+                                         ngFunc  : yoyaku.dialogOkCancel.closeMe});
         yoyaku.dialogOkCancel.initModule( jqueryMap.$container );
       }
 
@@ -305,6 +312,17 @@ yoyaku.shell = (function () {
       });
     });
 
+    // 削除確認ダイアログ
+    $.gevent.subscribe( $container, 'verifyCancel', function (event, msg_map) {
+      stateMap.errStr = msg_map.errStr;
+      changeAnchorPart({
+        status : 'dialog',
+        _status : {
+          dialogKind : 'verifydel'
+        }
+      });
+    });
+
     // 登録成功ダイアログ
     $.gevent.subscribe( $container, 'updateReserveSuccess', function (event, msg_map) {
       stateMap.errStr = '予約しました。';
@@ -319,6 +337,17 @@ yoyaku.shell = (function () {
     // 登録失敗ダイアログ
     $.gevent.subscribe( $container, 'updateReserveFailure', function (event, msg_map) {
       stateMap.errStr = '予約できませんでした。他の方が予約した可能性があります。';
+      changeAnchorPart({
+        status : 'dialog',
+        _status : {
+          dialogKind : 'Updone'
+        }
+      });
+    });
+
+    // 削除完了ダイアログ
+    $.gevent.subscribe( $container, 'deleteReserveResult', function (event, msg_map) {
+      stateMap.errStr = '予約を削除しました。';
       changeAnchorPart({
         status : 'dialog',
         _status : {

@@ -17,6 +17,8 @@
 .yoyaku-calendar-main {
   top    : 60px;
   left   : 10px;
+  width  : 360px;
+  table-layout: fixed;
   border-collapse:collapse;
   background : #F5F5DC;
 }
