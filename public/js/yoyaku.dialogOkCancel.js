@@ -21,15 +21,17 @@ yoyaku.dialogOkCancel = (function () {
           + '</div>'
         + '<div>',
         settable_map : {showStr : true,
-                        okFunc  : true},
+                        okFunc  : true,
+                        ngFunc  : true},
         showStr : "",
-        okFunc  : function () {}
+        okFunc  : function () {},
+        ngFunc  : function () {}
       },
       stateMap = {
         $append_target : null
       },
       jqueryMap = {},
-      setJqueryMap, configModule, initModule, removeDialog, onClose, onOK;
+      setJqueryMap, configModule, initModule, removeDialog, onCancel, closeMe, onOK;
 
   //---DOMメソッド---
   setJqueryMap = function () {
@@ -44,9 +46,14 @@ yoyaku.dialogOkCancel = (function () {
   }
 
   //---イベントハンドラ---
-  onClose = function () {
-    $.gevent.publish('cancelDialog', [{}]);
+  onCancel = function () {
+    //こっちも設定可能にする
+    configMap.ngFunc();
     return false;
+  }
+
+  closeMe = function () {
+    $.gevent.publish('cancelDialog', [{}]);
   }
 
   onOK = function () {
@@ -90,7 +97,7 @@ yoyaku.dialogOkCancel = (function () {
     jqueryMap.$buttonOK
       .click( onOK );
     jqueryMap.$buttonCancel
-      .click( onClose );
+      .click( onCancel );
 
     return true;
   }
@@ -99,6 +106,6 @@ yoyaku.dialogOkCancel = (function () {
     configModule : configModule,
     initModule   : initModule,
     removeDialog : removeDialog,
-    onClose      : onClose
+    closeMe      : closeMe
   };
 }());

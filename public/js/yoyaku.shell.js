@@ -8,14 +8,16 @@ yoyaku.shell = (function () {
   //---モジュールスコープ変数---
   var configMap = {
     anchor_schema_map : {
-      status : {dialog          : true,
+      status : {matiuke         : true,
+                dialog          : true,
                 calendar        : true  //従属変数なし
               },
       _status : {
         dialogKind : { login          : true,  // status : dialog のとき使用
                        logout         : true,  // status : dialog のとき使用
                        invalid        : true,  // status : dialog のとき使用
-                       verify         : true}  // status : dialog のとき使用
+                       verify         : true,  // status : dialog のとき使用
+                       Updone         : true}  // status : dialog のとき使用
       }
       // アンカーマップとして許容される型を事前に指定するためのもの。
       // 例えば、color : {red : true, blue : true}
@@ -25,30 +27,17 @@ yoyaku.shell = (function () {
     },
     main_html : String()
       + '<div class="yoyaku-shell-head">'
+        + '<p>面談の日程 web予約</p>'
         + '<button class="yoyaku-shell-head-acct"></button>'
       + '</div>'
       + '<div class="yoyaku-shell-main">'
-      + '</div>',
-    menuStr : String()
-      + '-',
-    menuStrLogined : String()
-      + '≡',
+      + '</div>'
     },
     stateMap = {
       $container : null,
       anchor_map : {},
-      skYear     : 0,
-      skMonth    : 0,
-      skDay      : 0,
-      koma       : 0,
-      jyugyouId  : 0,
-      errStr     : "",   // エラーダイアログで表示する文言を一時的に保持。
+      errStr     : ""    // エラーダイアログで表示する文言を一時的に保持。
                          // ここになきゃいけない情報でないので良い場所を見つけたら移す
-      studentMemo : null,// 登録対象の生徒の様子メモ
-                         // 出欠入力画面からも欠課入力画面からも遷移して
-                         // 入力するので、代表して一時的にここで保持
-      delMemo    : null  // 削除対象の生徒の様子メモ
-                         // 削除も複数画面から行うから、代表して一時的にここで保持
     },
     jqueryMap = {},
     copyAnchorMap, changeAnchorPart, onHashchange, setModal,
@@ -114,16 +103,28 @@ yoyaku.shell = (function () {
       } else if ( anchor_map._status.dialogKind == 'logout' ) {
         setModal(true);
         yoyaku.dialogOkCancel.configModule({showStr : 'ログアウトしますか？',
-                                         okFunc  : nbn.model.logout});
+                                         okFunc  : yoyaku.model.logout,
+                                         ngFunc  : yoyaku.dialogOkCancel.closeMe});
         yoyaku.dialogOkCancel.initModule( jqueryMap.$container );
       } else if ( anchor_map._status.dialogKind == 'invalid' ) {
         setModal(true);
         yoyaku.dialogOkCancel.configModule({showStr : stateMap.errStr,
                                          // OKでもキャンセルと同じ動きをさせる
-                                         okFunc  : nbn.dialogOkCancel.onClose});
+                                         okFunc  : yoyaku.dialogOkCancel.closeMe,
+                                         ngFunc  : yoyaku.dialogOkCancel.closeMe});
         yoyaku.dialogOkCancel.initModule( jqueryMap.$container );
       } else if ( anchor_map._status.dialogKind == 'verify' ) {
-
+        setModal(true);
+        yoyaku.dialogOkCancel.configModule({showStr : stateMap.errStr,
+                                         okFunc  : yoyaku.calendar.updateReserve,
+                                         ngFunc  : yoyaku.dialogOkCancel.closeMe});
+        yoyaku.dialogOkCancel.initModule( jqueryMap.$container );
+      } else if ( anchor_map._status.dialogKind == 'Updone' ) {
+        setModal(true);
+        yoyaku.dialogOkCancel.configModule({showStr : stateMap.errStr,
+                                         okFunc  : yoyaku.model.readyReserve,
+                                         ngFunc  : yoyaku.model.readyReserve});
+        yoyaku.dialogOkCancel.initModule( jqueryMap.$container );
       }
 
     // カレンダー画面の場合
@@ -134,6 +135,12 @@ yoyaku.shell = (function () {
 
       yoyaku.calendar.configModule({});
       yoyaku.calendar.initModule( jqueryMap.$main );
+
+    // 待ち受け画面の場合
+    } else if ( anchor_map.status == 'matiuke' ) {
+      setModal(false);
+      yoyaku.dialog.removeDialog();
+      yoyaku.dialogOkCancel.removeDialog();
     }
   }
 
@@ -280,27 +287,49 @@ yoyaku.shell = (function () {
       //どうする？
     });
 
-    // 検索メニュー表示
-    $.gevent.subscribe( $container, 'selectDocument', function (event, msg_map) {
+    // ダイアログ消去
+    $.gevent.subscribe( $container, 'cancelDialog', function (event, msg_map) {
+      changeAnchorPart({
+        status : 'matiuke'
+      });
+    });
+
+    // 登録確認ダイアログ
+    $.gevent.subscribe( $container, 'verifyUpdate', function (event, msg_map) {
+      stateMap.errStr = msg_map.errStr;
       changeAnchorPart({
         status : 'dialog',
         _status : {
-          dialogKind : 'find'
+          dialogKind : 'verify'
         }
       });
     });
 
-    // 登録画面表示
-    $.gevent.subscribe( $container, 'uploadDocument', function (event, msg_map) {
+    // 登録成功ダイアログ
+    $.gevent.subscribe( $container, 'updateReserveSuccess', function (event, msg_map) {
+      stateMap.errStr = '予約しました。';
       changeAnchorPart({
-        status : 'uploadDocument'
+        status : 'dialog',
+        _status : {
+          dialogKind : 'Updone'
+        }
       });
     });
 
-    // ドキュメント種別追加
-    $.gevent.subscribe( $container, 'addDocumentKind', function (event, msg_map) {
+    // 登録失敗ダイアログ
+    $.gevent.subscribe( $container, 'updateReserveFailure', function (event, msg_map) {
+      stateMap.errStr = '予約できませんでした。他の方が予約した可能性があります。';
       changeAnchorPart({
-        status : 'addDocumentKind'
+        status : 'dialog',
+        _status : {
+          dialogKind : 'Updone'
+        }
+      });
+    });
+
+    $.gevent.subscribe( $container, 'readyReserveDone', function (event, msg_map) {
+      changeAnchorPart({
+        status : 'calendar'
       });
     });
 

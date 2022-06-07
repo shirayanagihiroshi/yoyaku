@@ -3,65 +3,22 @@
  * 面談枠設定モジュール
  */
 
- .yoyaku-calendar-previousWeek, .yoyaku-calendar-back,
- .yoyaku-calendar-nextWeek,     .yoyaku-calendar-notice,
+ .yoyaku-calendar-notice,
  .yoyaku-calendar-main,         .yoyaku-calendar-update
  {
    position: absolute;
  }
 
-.yoyaku-calendar-previousWeek {
-  top : 10px;
-  left : 10px;
-  width : 150px;
-  height : 40px;
-  font-size: 25px;
-  border-radius: 8px;
-  cursor: pointer;
-  background-color: #E6E6FA;
-}
-.yoyaku-calendar-previousWeek:hover{
-  background-color: red;
-}
-
-.yoyaku-calendar-back {
-  top : 10px;
-  left : 180px;
-  width : 150px;
-  height : 40px;
-  font-size: 25px;
-  cursor: pointer;
-  border-radius: 8px;
-  background-color: #E6E6FA;
-}
-.yoyaku-calendar-back:hover{
-  background-color: red;
-}
-
-.yoyaku-calendar-nextWeek {
-  top : 10px;
-  left : 350px;
-  width : 150px;
-  height : 40px;
-  font-size: 25px;
-  cursor: pointer;
-  border-radius: 8px;
-  background-color: #E6E6FA;
-}
-.yoyaku-calendar-nextWeek:hover{
-  background-color: red;
-}
-
 .yoyaku-calendar-notice {
-  top : 120px;
+  top : 10px;
   left: 10px;
 }
 
 .yoyaku-calendar-main {
-  top    : 150px;
+  top    : 60px;
   left   : 10px;
   border-collapse:collapse;
-  background : #DFC0E0;
+  background : #F5F5DC;
 }
 
 .yoyaku-calendar-main th, .yoyaku-calendar-main tr, .yoyaku-calendar-main td {
@@ -85,7 +42,7 @@
 
 
 .yoyaku-calendar-edi {
-  background : #FE7575;
+  background : #ffb6c1;
 }
 
 .yoyaku-calendar-edimemo {

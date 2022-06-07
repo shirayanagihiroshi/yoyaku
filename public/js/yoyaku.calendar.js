@@ -16,16 +16,19 @@ yoyaku.calendar = (function () {
           + 'data-hi',
         propJi : String()
           + 'data-ji',
+        propWakuID : String()
+          + 'data-wakuid',
         settable_map : {}
       },
       stateMap = {
-        $container : null
+        $container : null,
+        wakuID     : 0
       },
       jqueryMap = {},
       setJqueryMap, configModule, initModule, removeCalendar,
-      createTable,
+      createTable, updateReserve, searchReserve,
 
-      verify, setNotice;
+      setNotice;
 
   //---DOMメソッド---
   setJqueryMap = function () {
@@ -38,10 +41,6 @@ yoyaku.calendar = (function () {
   }
 
   //---イベントハンドラ---
-  verify = function () {
-    // チェックすべき内容はないので、ユーザがOKなら良い
-    $.gevent.publish('verifyClUpdate', [{errStr:'日課、行事を入力しますか？'}]);
-  }
 
 
   //---ユーティリティメソッド---
@@ -96,8 +95,9 @@ yoyaku.calendar = (function () {
           } else {
             str += configMap.tbEdi;
             str += ' ' + configMap.propHi + '="' + propDate[i] + '"';
-            str += ' ' + configMap.propJi + '="' + myclsWaku[0].data[j][0] + '">';
-            str += myclsWaku[0].data[j][i] + '</td>';
+            str += ' ' + configMap.propJi + '="' + myclsWaku[0].data[j][0] + '"';
+            str += ' ' + configMap.propWakuID + '="' + String(myclsWaku[0].data[j][i]) + '">'
+            str += searchReserve(myclsWaku[0].data[j][i]) + '</td>';
           }
         }
       }
@@ -107,10 +107,53 @@ yoyaku.calendar = (function () {
     jqueryMap.$main.append(str);
   }
 
+  searchReserve = function (reserveTarget) {
+    let retval, idx,
+      reserve = yoyaku.model.getReserve(),
+      f = function (reserveTarget, cls) {
+            return function (target) {
+              if ( target.reserveTarget == reserveTarget && target.cls == cls) {
+                return true;
+              } else {
+                return false;
+              }
+            }
+          };
+
+    idx = reserve.findIndex(f(reserveTarget, yoyaku.model.getMyCls()));
+    //該当データがあれば
+    if (idx != -1) {
+      if (yoyaku.model.iskyouin()) {
+        retval = reserve[idx].name;
+      } else {
+        retval = '×';
+      }
+    } else {
+      retval = '○';
+    }
+
+    return retval;
+  }
+
+  updateReserve = function () {
+    if (yoyaku.model.iskyouin()) {
+
+    } else {
+      if (stateMap.wakuID != 0) {
+        let obj = {
+          userId        : yoyaku.model.getMyID(),
+          name          : yoyaku.model.getMyName(),
+          reserveTarget : stateMap.wakuID
+        }
+        yoyaku.model.updateReserve(obj);
+      }
+    }
+  }
+
   setNotice = function () {
     let str;
 
-    str = 'テスト';
+    str = '1箇所のみ予約できます。希望する箇所をタップしてください。○：可能、×：不可。';
 
     jqueryMap.$notice.html(str)
   }
@@ -139,17 +182,33 @@ yoyaku.calendar = (function () {
 
     // 出欠または理由が選択されたらON/OFFする。
     $(document).on('click', '.yoyaku-calendar-edi', function (event) {
-      let beforeVal = $(this).html();
+      let idx,
+        reserve  = yoyaku.model.getReserve(),
+        f = function (userId) {
+              return function (target) {
+                if ( target.userId == userId) {
+                  return true;
+                } else {
+                  return false;
+                }
+              }
+            };
 
-      if (beforeVal == 'A') {
-        $(this).html('B');
-      } else if (beforeVal == 'B') {
-        $(this).html("");
+      if (yoyaku.model.iskyouin()) {
+
       } else {
-        $(this).html('A');
+        idx = reserve.findIndex(f(yoyaku.model.getMyID()));
+        // まだ予約してないときのみ予約できる。
+        if (idx == -1) {
+          // 予約が入っていないところのみ予約できる。
+          if (searchReserve(Number($(this).attr(configMap.propWakuID))) == '○') {
+            // 登録対象の枠IDを保持しておく
+            stateMap.wakuID = Number($(this).attr(configMap.propWakuID));
+            // ユーザに確認してから登録
+            $.gevent.publish('verifyUpdate', [{errStr:$(this).attr(configMap.propHi) + $(this).attr(configMap.propJi) + 'を予約しますか？'}]);
+          }
+        }
       }
-      console.log( $(this).attr(configMap.propHi) );
-      console.log( $(this).attr(configMap.propJi) );
     });
 
     return true;
@@ -169,6 +228,7 @@ yoyaku.calendar = (function () {
   return {
     configModule  : configModule,
     initModule    : initModule,
-    removeCalendar: removeCalendar
+    removeCalendar: removeCalendar,
+    updateReserve : updateReserve
   };
 }());

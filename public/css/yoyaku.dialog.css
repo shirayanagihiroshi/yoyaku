@@ -17,7 +17,7 @@
   margin-left : -200px;
   top : 50%;
   left : 50%;
-  width : 400px;
+  width : 350px;
   height : 400px;
   border-radius : 3px;
   z-index : 2;
@@ -85,7 +85,7 @@
 
 .yoyaku-dialog-main-button-ok{
   top    : 260px;
-  left   : 40px;
+  left   : 30px;
   width  : 130px;
   line-height: 40px;
   font-size: 35px;
@@ -99,7 +99,7 @@
 
 .yoyaku-dialog-main-button-cancel{
   top    : 260px;
-  left   : 220px;
+  left   : 190px;
   width  : 130px;
   line-height : 40px;
   font-size: 35px;

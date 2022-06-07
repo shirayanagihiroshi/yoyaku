@@ -99,9 +99,10 @@ io.on("connection", function (socket) {
   });
 
   socket.on('updateReserve', function (msg) {
-    /*
+
     let i;
-    console.log("* * updateSyukketsu * *");
+    console.log("* * updateReserve * *");
+    /*
     console.log("gakunen:" + msg.syukketsuData.gakunen);
     console.log("cls:"     + msg.syukketsuData.cls);
     console.log("month:"   + msg.syukketsuData.month);
@@ -114,18 +115,20 @@ io.on("connection", function (socket) {
     db.findManyDocuments('user', {userId:msg.AKey.userId}, {projection:{_id:0}}, function (result) {
       // ログイン中のユーザにのみ回答
       if (result.length != 0 && msg.AKey.token == result[0].token ) {
+        // 同じ枠に対する登録は許さない。
         db.findManyDocuments('reserve', {cls:msg.cls, reserveTarget:msg.reserveTarget}, {projection:{_id:0}}, function (resultCyoufukuchk) {
-          if (result.length != 0) {
+          if (resultCyoufukuchk.length != 0) {
             console.log("reserve already exist");
             io.to(socket.id).emit('updateReserveFailure', {}); // 送信者のみに送信
           } else {
             db.updateDocument('reserve',
-                              {cls          : msg.cls,
-                               yoyakuTarget : msg.yoyakuTarget},
-                              {$set : {cls          : msg.cls,
-                                       yoyakuTarget : msg.yoyakuTarget,
-                                       userId       : msg.userId,
-                                       name         : msg.name}}, function (res) {
+                              {cls           : msg.cls,
+                               reserveTarget : msg.reserveTarget,
+                               userId        : msg.userId},
+                              {$set : {cls           : msg.cls,
+                                       reserveTarget : msg.reserveTarget,
+                                       userId        : msg.userId,
+                                       name          : msg.name}}, function (res) {
 
               //console.log('updateSyukketsu done' + res);
               io.to(socket.id).emit('updateReserveSuccess', res); // 送信者のみに送信

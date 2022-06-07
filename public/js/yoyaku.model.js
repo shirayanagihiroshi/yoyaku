@@ -7,8 +7,8 @@ yoyaku.model = (function () {
   'use strict';
 
   var initModule, login, logout, islogind, getAKey,
-      initLocal, iskyouin, getWaku, getReserve, updateReserve,
-      getMyCls, //関数
+      initLocal, iskyouin, getWaku, readyReserve, getReserve, updateReserve,
+      getMyID, getMyName, getMyCls, //関数
       accessKey, userKind, cls, name, waku, reserve; //モジュールスコープ変数
 
   initLocal = function () {
@@ -60,7 +60,19 @@ yoyaku.model = (function () {
 
       if (msg.clientState == 'init') {
         $.gevent.publish('loginSuccess', [{ name: name }]);
+      } else if (msg.clientState == 'afterUpdate') {
+        $.gevent.publish('readyReserveDone', [{}]);
       }
+    });
+
+    // 登録成功
+    yoyaku.data.registerReceive('updateReserveSuccess', function (msg) {
+      $.gevent.publish('updateReserveSuccess', [{}]);
+    });
+
+    // 登録失敗
+    yoyaku.data.registerReceive('updateReserveFailure', function (msg) {
+      $.gevent.publish('updateReserveFailure', [{}]);
     });
 
     yoyaku.data.registerReceive('logoutResult', function (msg) {
@@ -111,8 +123,6 @@ yoyaku.model = (function () {
   // userKind : 教員   : 10
   //          : 保護者 : 20
   iskyouin = function () {
-    // 仮
-    return true;
 
     if (userKind == 10) {
       return true;
@@ -130,20 +140,34 @@ yoyaku.model = (function () {
   }
 
   // 面談枠には予め枠のIDを振ってある。
-  // 枠のIDはクラスで一つだから、枠ID(yoyakuTarget)とクラスで
+  // 枠IDはクラスで一つだから、枠ID(reserveTarget)とクラスで
   // 面談が特定できる。
   updateReserve = function ( reserveData ) {
     let queryObj = {AKey          : accessKey,
                     userId        : reserveData.userId,
-                    name          : reserveDaya.name,
+                    name          : reserveData.name,
                     reserveTarget : reserveData.reserveTarget,
                     cls           : cls};
     console.log( queryObj );
-    skt.data.sendToServer('updateReserve',queryObj);
+    yoyaku.data.sendToServer('updateReserve',queryObj);
+  }
+
+  getMyID = function () {
+    return accessKey.userId;
+  }
+
+  getMyName = function () {
+    return name;
   }
 
   getMyCls = function () {
     return cls;
+  }
+
+  readyReserve　= function () {
+    // 予約情報を取る
+    yoyaku.data.sendToServer('getReserve', {AKey : accessKey,
+                                            clientState : 'afterUpdate'});
   }
 
   return { initModule      : initModule,
@@ -155,6 +179,9 @@ yoyaku.model = (function () {
           getWaku          : getWaku,
           getReserve       : getReserve,
           updateReserve    : updateReserve,
-          getMyCls         : getMyCls
+          getMyID          : getMyID,
+          getMyName        : getMyName,
+          getMyCls         : getMyCls,
+          readyReserve     : readyReserve
         };
 }());
