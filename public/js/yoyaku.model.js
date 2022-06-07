@@ -8,8 +8,8 @@ yoyaku.model = (function () {
 
   var initModule, login, logout, islogind, getAKey,
       initLocal, iskyouin, getWaku, readyReserve, getReserve, updateReserve,
-      deleteReserve, getMyID, getMyName, getMyCls, //関数
-      accessKey, userKind, cls, name, waku, reserve; //モジュールスコープ変数
+      deleteReserve, getMyID, getMyName, getMyCls, getMeibo,//関数
+      accessKey, userKind, cls, name, waku, reserve, meibo; //モジュールスコープ変数
 
   initLocal = function () {
     accessKey   = {};
@@ -18,6 +18,7 @@ yoyaku.model = (function () {
     name        = "";
     waku        = [];
     reserve     = [];
+    meibo       = [];
   }
 
   initModule = function () {
@@ -36,13 +37,22 @@ yoyaku.model = (function () {
         name      = msg.name;
         cls       = msg.cls;
 
-        // 枠情報を取っておく
-        yoyaku.data.sendToServer('getwaku', {AKey : accessKey,
+        // 名簿を取っておく
+        yoyaku.data.sendToServer('getMeibo', {AKey : accessKey,
                                              clientState : 'init'});
       // ログイン失敗
       } else {
         $.gevent.publish('loginFailure', [msg]);
       }
+    });
+
+    // 名簿　取得完了
+    yoyaku.data.registerReceive('getMeiboResult', function (msg) {
+      meibo = msg.res;
+
+      // 枠情報を取っておく
+      yoyaku.data.sendToServer('getwaku', {AKey : accessKey,
+                                           clientState : 'init'});
     });
 
     // 枠情報　取得完了
@@ -178,6 +188,10 @@ yoyaku.model = (function () {
     return cls;
   }
 
+  getMeibo = function () {
+    return meibo;
+  }
+
   readyReserve　= function () {
     // 予約情報を取る
     yoyaku.data.sendToServer('getReserve', {AKey : accessKey,
@@ -197,6 +211,7 @@ yoyaku.model = (function () {
           getMyID          : getMyID,
           getMyName        : getMyName,
           getMyCls         : getMyCls,
-          readyReserve     : readyReserve
+          readyReserve     : readyReserve,
+          getMeibo         : getMeibo
         };
 }());

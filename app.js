@@ -98,6 +98,12 @@ io.on("connection", function (socket) {
     commonDBFind(msg, 'reserve', 'getReserveResult');
   });
 
+  socket.on('getMeibo', function (msg) {
+    console.log("getMeibo");
+
+    commonDBFind(msg, 'user', 'getMeiboResult');
+  });
+
   socket.on('updateReserve', function (msg) {
 
     /*

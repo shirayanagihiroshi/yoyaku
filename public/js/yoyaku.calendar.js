@@ -9,7 +9,8 @@ yoyaku.calendar = (function () {
   var configMap = {
         main_html : String()
           + '<div class="yoyaku-calendar-notice"></div>'
-          + '<table class="yoyaku-calendar-main"></table>',
+          + '<table class="yoyaku-calendar-main"></table>'
+          + '<div class="yoyaku-calendar-notice2"></div>',
         tbEdi : String()
           + '<td class="yoyaku-calendar-edi"',
         propHi : String()
@@ -27,8 +28,7 @@ yoyaku.calendar = (function () {
       jqueryMap = {},
       setJqueryMap, configModule, initModule, removeCalendar,
       createTable, updateReserve, deleteReserve, searchReserve,
-
-      setNotice;
+      setNotice,setNotice2;
 
   //---DOMメソッド---
   setJqueryMap = function () {
@@ -36,7 +36,8 @@ yoyaku.calendar = (function () {
     jqueryMap = {
       $container   : $container,
       $notice      : $container.find( '.yoyaku-calendar-notice' ),
-      $main        : $container.find( '.yoyaku-calendar-main' )
+      $main        : $container.find( '.yoyaku-calendar-main' ),
+      $notice2     : $container.find( '.yoyaku-calendar-notice2' )
     };
   }
 
@@ -139,7 +140,12 @@ yoyaku.calendar = (function () {
         }
       }
     } else {
-      retval = '○';
+      // 枠ID0は都合が悪くて出来ない時とする。
+      if (reserveTarget == 0) {
+        retval = '×';
+      } else {
+        retval = '○';  
+      }
     }
 
     return retval;
@@ -178,6 +184,43 @@ yoyaku.calendar = (function () {
     jqueryMap.$notice.html(str)
   }
 
+  setNotice2 = function () {
+    let i, idx, myclsMeibo,
+      meibo   = yoyaku.model.getMeibo(),
+      reserve = yoyaku.model.getReserve(),
+      f = function (cls) {
+            return function (target) {
+              if ( target.cls == cls) {
+                return true;
+              } else {
+                return false;
+              }
+            }
+          },
+      f2 = function (userId) {
+             return function (target) {
+               if ( target.userId == userId) {
+                 return true;
+               } else {
+                 return false;
+               }
+             }
+           };
+
+    myclsMeibo = meibo.filter(f(yoyaku.model.getMyCls()));
+
+    jqueryMap.$notice2.append('<li>まだ予約していない生徒</li>');
+    for (i = 0; i < myclsMeibo.length; i++) {
+      idx = reserve.findIndex(f2(myclsMeibo[i].userId))
+      if (idx == -1) {
+        // 生徒は
+        if (myclsMeibo[i].userId.indexOf('hnjh') != -1) {
+          jqueryMap.$notice2.append('<li>' + myclsMeibo[i].name + '</li>');
+        }
+      }
+    }
+  }
+
   //---パブリックメソッド---
   configModule = function ( input_map ) {
     yoyaku.util.setConfigMap({
@@ -195,6 +238,9 @@ yoyaku.calendar = (function () {
 
     createTable();
     setNotice();
+    if (yoyaku.model.iskyouin()) {
+      setNotice2();
+    }
 
     // 重複して登録すると、何度もイベントが発行される。それを避けるため、一旦削除
     $(document).off('click');
@@ -249,6 +295,7 @@ yoyaku.calendar = (function () {
       if ( jqueryMap.$container ) {
         jqueryMap.$notice.remove();
         jqueryMap.$main.remove();
+        jqueryMap.$notice2.remove();
       }
     }
     return true;

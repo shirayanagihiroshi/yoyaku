@@ -3,7 +3,7 @@
  * 面談枠設定モジュール
  */
 
- .yoyaku-calendar-notice,
+ .yoyaku-calendar-notice,       .yoyaku-calendar-notice2,
  .yoyaku-calendar-main,         .yoyaku-calendar-update
  {
    position: absolute;
@@ -12,6 +12,11 @@
 .yoyaku-calendar-notice {
   top : 10px;
   left: 10px;
+}
+
+.yoyaku-calendar-notice2 {
+  top : 60px;
+  left: 400px;  
 }
 
 .yoyaku-calendar-main {
