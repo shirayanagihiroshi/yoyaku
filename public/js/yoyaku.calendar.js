@@ -11,7 +11,11 @@ yoyaku.calendar = (function () {
           + '<div class="yoyaku-calendar-notice"></div>'
           + '<table class="yoyaku-calendar-main"></table>',
         tbEdi : String()
-          + '<td class="yoyaku-calendar-edi">',
+          + '<td class="yoyaku-calendar-edi"',
+        propHi : String()
+          + 'data-hi',
+        propJi : String()
+          + 'data-ji',
         settable_map : {}
       },
       stateMap = {
@@ -44,9 +48,10 @@ yoyaku.calendar = (function () {
   createTable = function () {
 
     let i, j, myclsWaku,
-      str     = "",
-      waku    = yoyaku.model.getWaku(),
-      reserve = yoyaku.model.getReserve(),
+      propDate = [],
+      str      = "",
+      waku     = yoyaku.model.getWaku(),
+      reserve  = yoyaku.model.getReserve(),
       f = function (cls) {
             return function (target) {
               if ( target.cls == cls ) {
@@ -62,81 +67,44 @@ yoyaku.calendar = (function () {
 
     for (j = 0; j < myclsWaku[0].data.length; j++) {
       str += '<tr>';
-      for (i = 0; i < myclsWaku[0].data[j].length; i++) {
-        // 数値でなければきっと文字列で、日付か時間帯なのでそのまま表示
-        if (isNaN(myclsWaku[0].data[j][i])) {
-          str += '<td>' + myclsWaku[0].data[j][i] + '</td>';
-        // 数値なら枠のID
-        } else {
-          str += '<td></td>';
+
+      // 日付の行なら
+      if (myclsWaku[0].data[j][0] == "date") {
+
+        for (i = 0; i < myclsWaku[0].data[j].length; i++) {
+          // あとでプロパティに乗せるため取っておく
+          propDate[i] = myclsWaku[0].data[j][i];
+
+          if (i == 0) {
+            str += '<td></td>'
+          } else {
+            str += '<td>' + myclsWaku[0].data[j][i] + '</td>';
+          }
+        }
+
+      // 実際は一つのテーブルだが、テーブルの間っぽくみせるところなら
+      } else if (myclsWaku[0].data[j][0] == "space") {
+        for (i = 0; i < myclsWaku[0].data[j].length; i++) {
+          str += '<td style="border-left: none;border-right: none;">　</td>';
+        }
+
+      // 普通の行
+      } else {
+        for (i = 0; i < myclsWaku[0].data[j].length; i++) {
+          if (i == 0) {
+            str += '<td>' + myclsWaku[0].data[j][i] + '</td>';
+          } else {
+            str += configMap.tbEdi;
+            str += ' ' + configMap.propHi + '="' + propDate[i] + '"';
+            str += ' ' + configMap.propJi + '="' + myclsWaku[0].data[j][0] + '">';
+            str += myclsWaku[0].data[j][i] + '</td>';
+          }
         }
       }
+
       str += '</tr>';
     }
     jqueryMap.$main.append(str);
-
-/*
-    for (j = 0; j < 4; j++) {
-      weeks = yoyaku.util.getWeek(configMap.targetYear,
-                               configMap.targetMonth-1, //月だけ0始まり
-                               configMap.targetDay,
-                               j);
-      // 曜日あたり1行目：日付
-      str = '<tr>';
-      for (i = 0; i < 8; i++) {
-        if (i == 0) {
-          str += '<td>日付</td>';
-        } else {
-          str += '<td>';
-          //-1は最初の一つがA/Bでずれるから
-          str += String(weeks[i-1].month) + '/' + String(weeks[i-1].day);
-          str += '</td>';
-        }
-      }
-      str += '</tr>';
-      // 曜日あたり2行目：日課
-      str += '<tr>';
-      for (i = 0; i < 8; i++) {
-        if (i == 0) {
-          str += '<td>日課</td>';
-        } else {
-          str += configMap.tbNikka;
-          //-1は最初の一つがA/Bでずれるから
-          calOneDay = stateMap.cl.find(selectfunc(weeks[i-1].year, weeks[i-1].month, weeks[i-1].day));
-          if ( calOneDay != null ) {
-            if ( calOneDay.nikka != null ) {
-              str += calOneDay.nikka;
-            }
-
-            // 3行目の準備
-            if ( calOneDay.gyouji != null ) {
-              gyouji[i] = calOneDay.gyouji
-            } else {
-              gyouji[i] = "";
-            }
-          } else {
-            gyouji[i] = "";
-          }
-          str += '</td>';
-        }
-      }
-      str += '</tr>';
-      // 曜日あたり3行目：行事(今は教務で入力する形だが、連絡を全教員が入力するように
-      // これは別に移したほうがよい。そしたら、ABより詳細は授業の日課とかいれるか)
-      str += '<tr>';
-      for (i =0; i < 8; i++) {
-        if (i == 0) {
-          str += '<td>行事</td>';
-        } else {
-          str += configMap.tbGyouji;
-          str += gyouji[i];
-          str += '</td>';
-        }
-      }
-      str += '</tr>';
-      jqueryMap.$main.append(str);
-    }
-*/
   }
 
   setNotice = function () {
@@ -180,6 +148,8 @@ yoyaku.calendar = (function () {
       } else {
         $(this).html('A');
       }
+      console.log( $(this).attr(configMap.propHi) );
+      console.log( $(this).attr(configMap.propJi) );
     });
 
     return true;
