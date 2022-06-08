@@ -46,12 +46,12 @@ readyData = function () {
   // 処理したくないところはtrueをfalseにして飛ばす
   switch (stage) {
     case 1:
-      if (false) {
+      if (true) {
         db.deleteManyDocuments('user', {}, function (res) { nextstep();} );
       } else { nextstep(); }
       break;
     case 2:
-      if (false) {
+      if (true) {
         addUser(addUserList);
       } else { nextstep(); }
       break;

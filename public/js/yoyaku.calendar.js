@@ -183,7 +183,7 @@ yoyaku.calendar = (function () {
   setNotice = function () {
     let str;
 
-    str = '1箇所のみ予約できます。希望する箇所をタップしてください。○：可能、×：不可。';
+    str = '1箇所のみ予約できます。7/8(金)までにお願いします。○：可能、×：不可、期限：';
 
     jqueryMap.$notice.html(str)
   }
