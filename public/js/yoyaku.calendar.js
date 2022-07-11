@@ -183,7 +183,7 @@ yoyaku.calendar = (function () {
   setNotice = function () {
     let str;
 
-    str = '1箇所のみ予約できます。7/8(金)までにお願いします。○：可能、×：不可';
+    str = '直前の日程の変更はお電話でお願いします';
 
     jqueryMap.$notice.html(str)
   }
@@ -294,6 +294,7 @@ yoyaku.calendar = (function () {
         }
 
       } else {
+        /* 入力期間が終えたら、保護者の変更は許さない
         idx = reserve.findIndex(f(yoyaku.model.getMyID()));
         // まだ予約してないときのみ予約できる。
         if (idx == -1) {
@@ -314,6 +315,7 @@ yoyaku.calendar = (function () {
             $.gevent.publish('verifyCancel', [{errStr:$(this).attr(configMap.propHi) + $(this).attr(configMap.propJi) + 'の予約をキャンセルしますか？'}]);
           }
         }
+        */
       }
     });
 
