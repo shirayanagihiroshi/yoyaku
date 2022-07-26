@@ -66,6 +66,11 @@ readyData = function () {
       } else { nextstep(); }
       break;
     case 5:
+      if (true) {
+        db.deleteManyDocuments('reserve', {}, function (res) { nextstep();} );
+      } else { nextstep(); }
+      break;
+    case 6:
       process.exit(0);
       break;
   }
