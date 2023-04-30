@@ -20,9 +20,9 @@
 
     addUser,
     addUserList,// = JSON.parse(fs.readFileSync('./data2DB/user.json', 'utf8')),
-    addUserListTemp,
-    addWaku,
-    addWakuList = JSON.parse(fs.readFileSync('./data2DB/yoyaku_waku.json', 'utf8'));
+    addUserListTemp;
+    //addWaku,
+    //addWakuList = JSON.parse(fs.readFileSync('./data2DB/yoyaku_waku.json', 'utf8'));
 
 // excelでutf-8のjsonを出力して、読み込もうとしたが、
 // excelはBOM付きの UTF8を出力するらしいので、JSON.parseに
@@ -57,7 +57,9 @@ readyData = function () {
       break;
     case 3:
       if (true) {
-        db.deleteManyDocuments('yoyaku_waku', {}, function (res) { nextstep();} );
+        db.deleteManyDocuments('yoyaku_waku', {}, function (res) { 
+          console.log("delete yoyaku_waku done");
+          nextstep();} );
       } else { nextstep(); }
       break;
     case 4:
@@ -121,12 +123,14 @@ addUser = function (userList) {
   }
 }
 
+/*
 addWaku = function (addWakuList) {
   db.insertManyDocuments('yoyaku_waku', addWakuList, function ( result ) {
     console.log("add yoyau_waku done");
     nextstep();
   });
 }
+*/
 //------ユーティリティメソッドe--------
 
 //------設定s--------
