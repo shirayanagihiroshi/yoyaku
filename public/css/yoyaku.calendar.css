@@ -4,7 +4,8 @@
  */
 
  .yoyaku-calendar-notice,       .yoyaku-calendar-notice2,
- .yoyaku-calendar-main,         .yoyaku-calendar-update
+ .yoyaku-calendar-main,         .yoyaku-calendar-update,
+ .yoyaku-calendar-to-setting
  {
    position: absolute;
  }
@@ -14,9 +15,15 @@
   left: 10px;
 }
 
-.yoyaku-calendar-notice2 {
+.yoyaku-calendar-to-setting {
   top : 60px;
-  left: 400px;  
+  left: 400px;
+  color : blue;
+}
+
+.yoyaku-calendar-notice2 {
+  top : 100px;
+  left: 400px;
 }
 
 .yoyaku-calendar-main {

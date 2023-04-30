@@ -8,7 +8,8 @@ yoyaku.model = (function () {
 
   var initModule, login, logout, islogind, getAKey,
       initLocal, iskyouin, getWaku, readyReserve, getReserve, updateReserve,
-      deleteReserve, getMyID, getMyName, getMyCls, getMeibo,//関数
+      deleteReserve, getMyID, getMyName, getMyCls, getMeibo,
+      updateNowUsable, updateWaku, renewWaku,//関数
       accessKey, userKind, cls, name, waku, reserve, meibo; //モジュールスコープ変数
 
   initLocal = function () {
@@ -39,6 +40,7 @@ yoyaku.model = (function () {
 
         // 名簿を取っておく
         yoyaku.data.sendToServer('getMeibo', {AKey : accessKey,
+                                              SKey : {cls:cls},
                                              clientState : 'init'});
       // ログイン失敗
       } else {
@@ -52,6 +54,7 @@ yoyaku.model = (function () {
 
       // 枠情報を取っておく
       yoyaku.data.sendToServer('getwaku', {AKey : accessKey,
+                                           SKey : {cls:cls},
                                            clientState : 'init'});
     });
 
@@ -61,6 +64,7 @@ yoyaku.model = (function () {
 
       // 予約情報も取っておく
       yoyaku.data.sendToServer('getReserve', {AKey : accessKey,
+                                              SKey : {cls:cls},
                                               clientState : 'init'});
     });
 
@@ -105,6 +109,17 @@ yoyaku.model = (function () {
       }
       $.gevent.publish(eventName, [msg]);
     });
+
+    // 有効無効設定結果
+    yoyaku.data.registerReceive('updateNowUsableSuccess', function (msg) {
+      $.gevent.publish('updateNowUsableResult', [{}]);
+    });
+
+    // 日時の枠設定結果
+    yoyaku.data.registerReceive('updateWakuSuccess', function (msg) {
+      $.gevent.publish('updateWakuResult', [{}]);
+    });
+
 
   };//initModule end
 
@@ -176,6 +191,30 @@ yoyaku.model = (function () {
     yoyaku.data.sendToServer('deleteReserve',queryObj);
   }
 
+  // 該当クラスの予約機能の有効・無効を設定する。
+  // 直前まで予約が変動すると、管理しにくいので
+  // いつまでに入力してねの期間を過ぎたら担任が無効にする運用イメージ
+  updateNowUsable = function ( nowusable ) {
+    let queryObj = {AKey          : accessKey,
+                    cls           : cls,
+                    nowusable     : nowusable};
+    yoyaku.data.sendToServer('updateNowUsable',queryObj);
+  }
+
+  updateWaku = function ( waku ) {
+    let queryObj = {AKey          : accessKey,
+                    cls           : cls,
+                    waku          : waku};
+    yoyaku.data.sendToServer('updateWaku',queryObj);
+  }
+
+  renewWaku = function ( waku ) {
+      // 枠設定後はログイン成功時と同じ流れに沿って処理する
+      yoyaku.data.sendToServer('getwaku', {AKey : accessKey,
+                                           SKey : {cls:cls},
+                                           clientState : 'init'});
+  }
+
   getMyID = function () {
     return accessKey.userId;
   }
@@ -195,6 +234,7 @@ yoyaku.model = (function () {
   readyReserve　= function () {
     // 予約情報を取る
     yoyaku.data.sendToServer('getReserve', {AKey : accessKey,
+                                            SKey : {cls:cls},
                                             clientState : 'afterUpdate'});
   }
 
@@ -208,6 +248,9 @@ yoyaku.model = (function () {
           getReserve       : getReserve,
           updateReserve    : updateReserve,
           deleteReserve    : deleteReserve,
+          updateNowUsable  : updateNowUsable,
+          updateWaku       : updateWaku,
+          renewWaku        : renewWaku,
           getMyID          : getMyID,
           getMyName        : getMyName,
           getMyCls         : getMyCls,

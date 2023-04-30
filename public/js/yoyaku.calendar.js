@@ -10,6 +10,7 @@ yoyaku.calendar = (function () {
         main_html : String()
           + '<div class="yoyaku-calendar-notice"></div>'
           + '<table class="yoyaku-calendar-main"></table>'
+          + '<div class="yoyaku-calendar-to-setting">設定画面へ</div>'
           + '<div class="yoyaku-calendar-notice2"></div>',
         tbEdi : String()
           + '<td class="yoyaku-calendar-edi"',
@@ -28,7 +29,7 @@ yoyaku.calendar = (function () {
       jqueryMap = {},
       setJqueryMap, configModule, initModule, removeCalendar,
       createTable, updateReserve, deleteReserve, searchReserve,
-      setNotice,setNotice2;
+      setNotice,setNotice2, toSetting;
 
   //---DOMメソッド---
   setJqueryMap = function () {
@@ -37,12 +38,16 @@ yoyaku.calendar = (function () {
       $container   : $container,
       $notice      : $container.find( '.yoyaku-calendar-notice' ),
       $main        : $container.find( '.yoyaku-calendar-main' ),
+      $toSetting   : $container.find( '.yoyaku-calendar-to-setting' ),
       $notice2     : $container.find( '.yoyaku-calendar-notice2' )
     };
   }
 
   //---イベントハンドラ---
 
+  toSetting = function () {
+    $.gevent.publish('setting', [{}]);
+  }
 
   //---ユーティリティメソッド---
   // テーブルの表示位置やサイズの調整は微妙。
@@ -50,10 +55,10 @@ yoyaku.calendar = (function () {
   // スペースを入れると、改行がなされる模様。
   createTable = function () {
 
-    let i, j, myclsWaku,
+    let i, j,
       propDate = [],
       str      = "",
-      waku     = yoyaku.model.getWaku(),
+      myclsWaku = yoyaku.model.getWaku(),
       reserve  = yoyaku.model.getReserve(),
       f = function (cls) {
             return function (target) {
@@ -65,8 +70,10 @@ yoyaku.calendar = (function () {
             }
           };
 
-    // 自分のクラスの面談枠に絞り込む
-    myclsWaku = waku.filter(f(yoyaku.model.getMyCls()));
+    // 日時の枠を未設定の場合は表示しない
+    if (myclsWaku.length == 0) {
+      return;
+    }
 
     for (j = 0; j < myclsWaku[0].data.length; j++) {
       str += '<tr>';
@@ -81,7 +88,9 @@ yoyaku.calendar = (function () {
           if (i == 0) {
             str += '<td></td>'
           } else {
-            str += '<td>' + myclsWaku[0].data[j][i] + '</td>';
+            // 無理やり半角スペースを入れる
+            let words = myclsWaku[0].data[j][i].split('(');
+            str += '<td>' + words[0] + ' (' + words[1] + '</td>';
           }
         }
 
@@ -114,10 +123,10 @@ yoyaku.calendar = (function () {
   // 枠IDから予約者を引き当てる
   searchReserve = function (reserveTarget) {
     let retval, idx,
-      reserve = yoyaku.model.getReserve(),
-      f = function (reserveTarget, cls) {
+      reserve = yoyaku.model.getReserve(), // 該当クラスの分だけが取れる。
+      f = function (reserveTarget) {
             return function (target) {
-              if ( target.reserveTarget == reserveTarget && target.cls == cls) {
+              if ( target.reserveTarget == reserveTarget) {
                 return true;
               } else {
                 return false;
@@ -125,7 +134,7 @@ yoyaku.calendar = (function () {
             }
           };
 
-    idx = reserve.findIndex(f(reserveTarget, yoyaku.model.getMyCls()));
+    idx = reserve.findIndex(f(reserveTarget));
     //該当データがあれば
     if (idx != -1) {
       if (yoyaku.model.iskyouin()) {
@@ -181,28 +190,23 @@ yoyaku.calendar = (function () {
   }
 
   setNotice = function () {
-    let str;
+    let str, waku = yoyaku.model.getWaku();
 
-    str = '1箇所のみ予約できます。○：可能、×：不可';
-//    str = '直前の日程の変更はお電話でお願いします';
-
-    jqueryMap.$notice.html(str)
+    if (waku.length != 0) {
+      if (waku[0].nowusable == true) {
+        str = '1箇所のみ予約できます。○：可能、×：不可';
+      } else {
+        str = '直前の日程の変更はお電話でお願いします';
+      }
+      jqueryMap.$notice.html(str)
+    }
   }
 
   setNotice2 = function () {
-    let i, idx, myclsMeibo,
-      meibo   = yoyaku.model.getMeibo(),
-      reserve = yoyaku.model.getReserve(),
-      f = function (cls) {
-            return function (target) {
-              if ( target.cls == cls) {
-                return true;
-              } else {
-                return false;
-              }
-            }
-          },
-      f2 = function (userId) {
+    let i, idx,
+      myclsMeibo = yoyaku.model.getMeibo(),
+      reserve    = yoyaku.model.getReserve(),
+      f = function (userId) {
              return function (target) {
                if ( target.userId == userId) {
                  return true;
@@ -212,14 +216,12 @@ yoyaku.calendar = (function () {
              }
            };
 
-    myclsMeibo = meibo.filter(f(yoyaku.model.getMyCls()));
-
     jqueryMap.$notice2.append('<li>まだ予約していない生徒</li>');
     for (i = 0; i < myclsMeibo.length; i++) {
-      idx = reserve.findIndex(f2(myclsMeibo[i].userId))
+      idx = reserve.findIndex(f(myclsMeibo[i].userId))
       if (idx == -1) {
         // 生徒は
-        if (myclsMeibo[i].userId.indexOf('hnjh') != -1) {
+        if (myclsMeibo[i].userKind == 20) {
           jqueryMap.$notice2.append('<li>' + myclsMeibo[i].name + '</li>');
         }
       }
@@ -245,6 +247,13 @@ yoyaku.calendar = (function () {
     setNotice();
     if (yoyaku.model.iskyouin()) {
       setNotice2();
+
+      jqueryMap.$toSetting
+        .click( toSetting );
+
+    } else {
+      // 保護者には設定画面は見せない
+      jqueryMap.$toSetting.css('display', 'none');
     }
 
     // 重複して登録すると、何度もイベントが発行される。それを避けるため、一旦削除
@@ -255,6 +264,7 @@ yoyaku.calendar = (function () {
     $(document).on('click', '.yoyaku-calendar-edi', function (event) {
       let idx,
         reserve  = yoyaku.model.getReserve(),
+        waku = yoyaku.model.getWaku(),
         f = function (userId) {
               return function (target) {
                 if ( target.userId == userId) {
@@ -264,6 +274,11 @@ yoyaku.calendar = (function () {
                 }
               }
             };
+
+      //担任が無効にしていたら、操作を受け付けない
+      if (!waku[0].nowusable == true) {
+        return true;
+      }
 
       if (yoyaku.model.iskyouin()) {
         // 予約が入っていないところのみ予約できる。
@@ -275,9 +290,9 @@ yoyaku.calendar = (function () {
 
         // 予約が入っているときは自分の予約ならキャンセル
         } else {
-          let obj, f = function (reserveTarget, cls) {
+          let obj, f = function (reserveTarget) {
                          return function (target) {
-                           if ( target.reserveTarget == reserveTarget && target.cls == cls) {
+                           if ( target.reserveTarget == reserveTarget ) {
                              return true;
                            } else {
                              return false;
@@ -285,7 +300,7 @@ yoyaku.calendar = (function () {
                          }
                        };
 
-          obj = reserve.find(f(Number($(this).attr(configMap.propWakuID)), yoyaku.model.getMyCls()) )
+          obj = reserve.find( f(Number($(this).attr(configMap.propWakuID))) );
           if ( obj.userId == yoyaku.model.getMyID() ) {
             // キャンセル対象の枠IDを保持しておく
             stateMap.wakuID = Number($(this).attr(configMap.propWakuID));

@@ -22,14 +22,14 @@
     addUserList,// = JSON.parse(fs.readFileSync('./data2DB/user.json', 'utf8')),
     addUserListTemp,
     addWaku,
-    addWakuList = JSON.parse(fs.readFileSync('./data2DB/waku.json', 'utf8'));
+    addWakuList = JSON.parse(fs.readFileSync('./data2DB/yoyaku_waku.json', 'utf8'));
 
 // excelでutf-8のjsonを出力して、読み込もうとしたが、
 // excelはBOM付きの UTF8を出力するらしいので、JSON.parseに
 // Unexpected token ﻿ in JSON at position 0
 // と怒られる。
 // 先頭を無視するとうまく動く様子
-addUserListTemp = fs.readFileSync('./data2DB/user.json',  'utf8');
+addUserListTemp = fs.readFileSync('./data2DB/yoyaku_user.json',  'utf8');
 if (addUserListTemp.charCodeAt(0) === 0xFEFF) {
   addUserListTemp = addUserListTemp.substr(1);
 }
@@ -47,7 +47,7 @@ readyData = function () {
   switch (stage) {
     case 1:
       if (true) {
-        db.deleteManyDocuments('user', {}, function (res) { nextstep();} );
+        db.deleteManyDocuments('yoyaku_user', {}, function (res) { nextstep();} );
       } else { nextstep(); }
       break;
     case 2:
@@ -57,17 +57,20 @@ readyData = function () {
       break;
     case 3:
       if (true) {
-        db.deleteManyDocuments('waku', {}, function (res) { nextstep();} );
+        db.deleteManyDocuments('yoyaku_waku', {}, function (res) { nextstep();} );
       } else { nextstep(); }
       break;
     case 4:
-      if (true) {
+      if (false) {
         addWaku(addWakuList);
       } else { nextstep(); }
       break;
     case 5:
       if (true) {
-        db.deleteManyDocuments('reserve', {}, function (res) { nextstep();} );
+        db.deleteManyDocuments('yoyaku_reserve', {}, function (res) {
+          console.log("delete yoyaku_reserve done");
+          nextstep();
+        } );
       } else { nextstep(); }
       break;
     case 6:
@@ -99,10 +102,10 @@ addUser = function (userList) {
                        token    : "",
                        cls      : classStr,
                        passWord : hashstr};
-      db.insertDocument('user', insertObj, function (result) {
+      db.insertDocument('yoyaku_user', insertObj, function (result) {
         complete_num++;
         if (complete_num == listnum) {
-            console.log('addUser done');
+            console.log('add yoyaku_user done');
             nextstep();
         }
       });
@@ -119,8 +122,8 @@ addUser = function (userList) {
 }
 
 addWaku = function (addWakuList) {
-  db.insertManyDocuments('waku', addWakuList, function ( result ) {
-    console.log("addWaku done");
+  db.insertManyDocuments('yoyaku_waku', addWakuList, function ( result ) {
+    console.log("add yoyau_waku done");
     nextstep();
   });
 }

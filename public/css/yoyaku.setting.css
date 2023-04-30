@@ -1,0 +1,63 @@
+/*
+ * yoyaku.setting.css
+ * 面談の日時や時間の設定、保護者の入力を許可するかどうか設定するモジュール
+ */
+
+ .yoyaku-setting-back,
+ .yoyaku-setting-waku, .yoyaku-setting-waku-ok,
+ .yoyaku-now-usable1, .yoyaku-now-usable2, .yoyaku-now-usable3,
+ .yoyaku-setting-usable-change,
+ .yoyaku-title-1, .yoyaku-title-2, .yoyaku-title-3
+ {
+   position: absolute;
+ }
+
+.yoyaku-setting-back {
+  top : 10px;
+  left: 10px;
+}
+
+.yoyaku-title-1 {
+  top : 60px;
+  left: 10px;
+}
+
+.yoyaku-now-usable1, .yoyaku-now-usable2, .yoyaku-now-usable3 {
+  top : 85px;
+  left: 10px;
+}
+
+.yoyaku-now-usable1 {
+  color : blue;
+}
+
+.yoyaku-now-usable2 {
+  color : red;
+}
+
+.yoyaku-setting-usable-change {
+  top : 85px;
+  left: 210px;
+}
+
+.yoyaku-title-2 {
+  top : 140px;
+  left: 10px;
+}
+
+.yoyaku-title-3 {
+  top : 160px;
+  left: 10px;
+}
+
+.yoyaku-setting-waku {
+  top    : 185px;
+  left   : 10px;
+  width  : 180px;
+  height : 180px;
+}
+
+.yoyaku-setting-waku-ok {
+  top : 185px;
+  left: 210px;
+}

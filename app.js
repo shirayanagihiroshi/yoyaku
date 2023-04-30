@@ -25,8 +25,8 @@ io.on("connection", function (socket) {
   // ログインなど特殊なのは別処理
   let commonDBFind = function (msg, collectionName, resultMessageName) {
 
-    // アクセスキーの確認のために'user'にアクセスしている
-    db.findManyDocuments('user', {userId:msg.AKey.userId}, {projection:{_id:0}}, function (result) {
+    // アクセスキーの確認のために'yoyaku_user'にアクセスしている
+    db.findManyDocuments('yoyaku_user', {userId:msg.AKey.userId}, {projection:{_id:0}}, function (result) {
       // ログイン中のユーザにのみ回答
       if (result.length != 0 && msg.AKey.token == result[0].token ) {
         db.findManyDocuments(collectionName, msg.SKey, {projection:{_id:0}}, function (res) {
@@ -43,7 +43,7 @@ io.on("connection", function (socket) {
   };
 
   socket.on('tryLogin', function (msg) {
-    db.findManyDocuments('user', {userId:msg.userId}, {projection:{_id:0}}, function (result) {
+    db.findManyDocuments('yoyaku_user', {userId:msg.userId}, {projection:{_id:0}}, function (result) {
       if (result.length != 0) {
         crypt.compare(msg.passWord, result[0].passWord, function (res) {
           //パスワードが一致
@@ -51,7 +51,7 @@ io.on("connection", function (socket) {
             let token = String(Math.random()).slice(2,12);
 
             //お手軽なランダム文字列をトークンとして設定し、ログイン状態とする
-            db.updateDocument('user', {userId:msg.userId}, {$set:{token:token}}, function (res) {
+            db.updateDocument('yoyaku_user', {userId:msg.userId}, {$set:{token:token}}, function (res) {
               io.to(socket.id).emit('loginResult', {result   : true,
                                                     userId   : msg.userId,
                                                     token    : token,
@@ -73,10 +73,10 @@ io.on("connection", function (socket) {
   });
 
   socket.on('tryLogout', function (msg) {
-    db.findManyDocuments('user', {userId:msg.userId}, {projection:{_id:0}}, function (result) {
+    db.findManyDocuments('yoyaku_user', {userId:msg.userId}, {projection:{_id:0}}, function (result) {
       if (result.length != 0) {
         //トークンを空文字列とし、ログアウト状態とする
-        db.updateDocument('user', {userId:msg.userId}, {$set:{token:""}}, function (res) {
+        db.updateDocument('yoyaku_user', {userId:msg.userId}, {$set:{token:""}}, function (res) {
           io.to(socket.id).emit('logoutResult', {result: true}); // 送信者のみに送信
         });
       // 該当ユーザがいない
@@ -89,23 +89,22 @@ io.on("connection", function (socket) {
   socket.on('getwaku', function (msg) {
     console.log("getwaku");
 
-    commonDBFind(msg, 'waku', 'getwakuResult');
+    commonDBFind(msg, 'yoyaku_waku', 'getwakuResult');
   });
 
   socket.on('getReserve', function (msg) {
     console.log("getReserve");
 
-    commonDBFind(msg, 'reserve', 'getReserveResult');
+    commonDBFind(msg, 'yoyaku_reserve', 'getReserveResult');
   });
 
   socket.on('getMeibo', function (msg) {
     console.log("getMeibo");
 
-    commonDBFind(msg, 'user', 'getMeiboResult');
+    commonDBFind(msg, 'yoyaku_user', 'getMeiboResult');
   });
 
   socket.on('updateReserve', function (msg) {
-
     /*
     let i;
     console.log("* * updateReserve * *");
@@ -118,16 +117,16 @@ io.on("connection", function (socket) {
       console.log(msg.syukketsuData.member[i]);
     }*/
 
-    db.findManyDocuments('user', {userId:msg.AKey.userId}, {projection:{_id:0}}, function (result) {
+    db.findManyDocuments('yoyaku_user', {userId:msg.AKey.userId}, {projection:{_id:0}}, function (result) {
       // ログイン中のユーザにのみ回答
       if (result.length != 0 && msg.AKey.token == result[0].token ) {
         // 同じ枠に対する登録は許さない。
-        db.findManyDocuments('reserve', {cls:msg.cls, reserveTarget:msg.reserveTarget}, {projection:{_id:0}}, function (resultCyoufukuchk) {
+        db.findManyDocuments('yoyaku_reserve', {cls:msg.cls, reserveTarget:msg.reserveTarget}, {projection:{_id:0}}, function (resultCyoufukuchk) {
           if (resultCyoufukuchk.length != 0) {
             console.log("reserve already exist");
             io.to(socket.id).emit('updateReserveFailure', {}); // 送信者のみに送信
           } else {
-            db.updateDocument('reserve',
+            db.updateDocument('yoyaku_reserve',
                               {cls           : msg.cls,
                                reserveTarget : msg.reserveTarget,
                                userId        : msg.userId},
@@ -135,7 +134,6 @@ io.on("connection", function (socket) {
                                        reserveTarget : msg.reserveTarget,
                                        userId        : msg.userId,
                                        name          : msg.name}}, function (res) {
-
               //console.log('updateSyukketsu done' + res);
               io.to(socket.id).emit('updateReserveSuccess', res); // 送信者のみに送信
             });
@@ -156,10 +154,10 @@ io.on("connection", function (socket) {
     console.log("month:"   + msg.SKey.month);
     console.log("day:"     + msg.SKey.day);
     */
-    db.findManyDocuments('user', {userId:msg.AKey.userId}, {projection:{_id:0}}, function (result) {
+    db.findManyDocuments('yoyaku_user', {userId:msg.AKey.userId}, {projection:{_id:0}}, function (result) {
       // ログイン中のユーザにのみ回答
       if (result.length != 0 && msg.AKey.token == result[0].token ) {
-        db.deleteManyDocuments('reserve',
+        db.deleteManyDocuments('yoyaku_reserve',
                                {reserveTarget : msg.reserveTarget,
                                cls            : msg.cls},
                                function (res) {
@@ -173,6 +171,44 @@ io.on("connection", function (socket) {
     });
   });
 
+  socket.on('updateNowUsable', function (msg) {
+
+    db.findManyDocuments('yoyaku_user', {userId:msg.AKey.userId}, {projection:{_id:0}}, function (result) {
+      // ログイン中のユーザにのみ回答
+      if (result.length != 0 && msg.AKey.token == result[0].token ) {
+        db.updateDocument('yoyaku_waku',
+                          {cls           : msg.cls},
+                          {$set : {nowusable : msg.nowusable}}, function (res) {
+          console.log('updateNowUsable done');
+          io.to(socket.id).emit('updateNowUsableSuccess', res); // 送信者のみに送信
+        });
+      } else {
+        io.to(socket.id).emit('anotherLogin', {}); // 送信者のみに送信
+      }
+    });
+  });
+
+  socket.on('updateWaku', function (msg) {
+    db.findManyDocuments('yoyaku_user', {userId:msg.AKey.userId}, {projection:{_id:0}}, function (result) {
+      // ログイン中のユーザにのみ回答
+      if (result.length != 0 && msg.AKey.token == result[0].token ) {
+        db.updateDocument('yoyaku_waku',
+                          {cls           : msg.cls},
+                          {$set : {data : msg.waku, nowusable:true}}, function (res) {
+          // 時間帯ごとに決まるIDは重複してはいけないので、該当クラスの予約情報は全て消す
+          db.deleteManyDocuments('yoyaku_reserve',
+                                 {cls            : msg.cls},
+                                 function (res) {
+            io.to(socket.id).emit('updateWakuSuccess', res); // 送信者のみに送信
+          });
+        });
+      } else {
+        io.to(socket.id).emit('anotherLogin', {}); // 送信者のみに送信
+      }
+    });
+  });
+
+
   // 切断
   socket.on("disconnect", () => {
     console.log("user disconnected");
@@ -184,9 +220,9 @@ io.on("connection", function (socket) {
     // 端末がある模様。トークンを削除しないことにする
     // ログアウトしたかどうかの判定はできなくなる
     /*
-    db.findManyDocuments('user', {token:socket.id}, function (result) {
+    db.findManyDocuments('yoyaku_user', {token:socket.id}, function (result) {
       if ( result.length != 0 ) {
-        db.updateDocument('user', {token:socket.id}, {$set:{token:""}}, function (res) {
+        db.updateDocument('yoyaku_user', {token:socket.id}, {$set:{token:""}}, function (res) {
           // do nothing
         });
       }

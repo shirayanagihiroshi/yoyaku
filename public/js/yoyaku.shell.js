@@ -10,7 +10,8 @@ yoyaku.shell = (function () {
     anchor_schema_map : {
       status : {matiuke         : true,
                 dialog          : true,
-                calendar        : true  //従属変数なし
+                calendar        : true, //従属変数なし
+                setting         : true  //従属変数なし
               },
       _status : {
         dialogKind : { login          : true,  // status : dialog のとき使用
@@ -18,7 +19,10 @@ yoyaku.shell = (function () {
                        invalid        : true,  // status : dialog のとき使用
                        verify         : true,  // status : dialog のとき使用
                        verifydel      : true,  // status : dialog のとき使用
-                       Updone         : true}  // status : dialog のとき使用
+                       Updone         : true,  // status : dialog のとき使用
+                       nowusableverify :true,  // status : dialog のとき使用
+                       wakuverify     : true,  // status : dialog のとき使用
+                       wakuUpdateDone : true}  // status : dialog のとき使用
       }
       // アンカーマップとして許容される型を事前に指定するためのもの。
       // 例えば、color : {red : true, blue : true}
@@ -132,6 +136,24 @@ yoyaku.shell = (function () {
                                          okFunc  : yoyaku.calendar.deleteReserve,
                                          ngFunc  : yoyaku.dialogOkCancel.closeMe});
         yoyaku.dialogOkCancel.initModule( jqueryMap.$container );
+      } else if ( anchor_map._status.dialogKind == 'nowusableverify' ) {
+        setModal(true);
+        yoyaku.dialogOkCancel.configModule({showStr : stateMap.errStr,
+                                         okFunc  : yoyaku.setting.updateNowUsable,
+                                         ngFunc  : yoyaku.dialogOkCancel.closeMe});
+        yoyaku.dialogOkCancel.initModule( jqueryMap.$container );
+      } else if ( anchor_map._status.dialogKind == 'wakuverify' ) {
+        setModal(true);
+        yoyaku.dialogOkCancel.configModule({showStr : stateMap.errStr,
+                                         okFunc  : yoyaku.setting.updateWaku,
+                                         ngFunc  : yoyaku.dialogOkCancel.closeMe});
+        yoyaku.dialogOkCancel.initModule( jqueryMap.$container );
+      } else if ( anchor_map._status.dialogKind == 'wakuUpdateDone' ) {
+        setModal(true);
+        yoyaku.dialogOkCancel.configModule({showStr : stateMap.errStr,
+                                         okFunc  : yoyaku.model.renewWaku,
+                                         ngFunc  : yoyaku.dialogOkCancel.closeMe});
+        yoyaku.dialogOkCancel.initModule( jqueryMap.$container );
       }
 
     // カレンダー画面の場合
@@ -139,9 +161,20 @@ yoyaku.shell = (function () {
       setModal(false);
       yoyaku.dialog.removeDialog();
       yoyaku.dialogOkCancel.removeDialog();
+      yoyaku.setting.removeSetting();
 
       yoyaku.calendar.configModule({});
       yoyaku.calendar.initModule( jqueryMap.$main );
+
+    // 設定画面の場合
+    } else if ( anchor_map.status == 'setting' ) {
+      setModal(false);
+      yoyaku.dialog.removeDialog();
+      yoyaku.dialogOkCancel.removeDialog();
+      yoyaku.calendar.removeCalendar();
+
+      yoyaku.setting.configModule({});
+      yoyaku.setting.initModule( jqueryMap.$main );
 
     // 待ち受け画面の場合
     } else if ( anchor_map.status == 'matiuke' ) {
@@ -359,6 +392,64 @@ yoyaku.shell = (function () {
     $.gevent.subscribe( $container, 'readyReserveDone', function (event, msg_map) {
       changeAnchorPart({
         status : 'calendar'
+      });
+    });
+
+    // 設定画面へ
+    $.gevent.subscribe( $container, 'setting', function (event, msg_map) {
+      changeAnchorPart({
+        status : 'setting'
+      });
+    });
+
+    // 設定画面からカレンダーに戻る
+    $.gevent.subscribe( $container, 'backToCalendar', function (event, msg_map) {
+      changeAnchorPart({
+        status : 'calendar'
+      });
+    });
+
+    // 予約機能有効化無効化確認ダイアログ
+    $.gevent.subscribe( $container, 'verifyOnOff', function (event, msg_map) {
+      stateMap.errStr = msg_map.errStr;
+      changeAnchorPart({
+        status : 'dialog',
+        _status : {
+          dialogKind : 'nowusableverify'
+        }
+      });
+    });
+
+    // 予約機能有効化無効化 設定しましたダイアログ
+    $.gevent.subscribe( $container, 'updateNowUsableResult', function (event, msg_map) {
+      stateMap.errStr = '予約機能の有効・無効を変更しました。';
+      changeAnchorPart({
+        status : 'dialog',
+        _status : {
+          dialogKind : 'wakuUpdateDone'
+        }
+      });
+    });
+
+    // 日時の枠設定確認ダイアログ
+    $.gevent.subscribe( $container, 'verifyWaku', function (event, msg_map) {
+      stateMap.errStr = msg_map.errStr;
+      changeAnchorPart({
+        status : 'dialog',
+        _status : {
+          dialogKind : 'wakuverify'
+        }
+      });
+    });
+
+    // 日時の枠設定 設定しましたダイアログ
+    $.gevent.subscribe( $container, 'updateWakuResult', function (event, msg_map) {
+      stateMap.errStr = '日時の枠を設定しました。';
+      changeAnchorPart({
+        status : 'dialog',
+        _status : {
+          dialogKind : 'wakuUpdateDone'
+        }
       });
     });
 
