@@ -1,0 +1,132 @@
+<html>
+<head>
+	<meta http-equiv="content-type" charset="utf-8">
+	<link rel="stylesheet" href="index.css">
+	<title>yoyakuの使い方</title>
+</head>
+<body>
+
+<div class="box1">
+<h1>面談の日程予約サービスの使い方</h1>
+</div>
+<h2>目次</h2>
+<ol>
+  <li><a href="#gaiyou">概要</a></li>
+  <li><a href="#rireki">更新履歴</a></li>
+  <li><a href="#howtoLogin">ログインするには</a></li>
+  <li><a href="#wakuset">面談の日時の枠を設定する</a></li>
+  <li><a href="#parents">保護者の操作(予約)</a></li>
+  <li><a href="#parentsCancel">保護者の操作(予約キャンセル)</a></li>
+  <li><a href="#teacher">先生の操作(確認)</a></li>
+  <li><a href="#teacherReserve">先生の操作(予約)</a></li>
+  <li><a href="#teacherOff">先生の操作(予約機能の無効化)</a></li>
+  <li><a href="#teacherOn">先生の操作(予約機能の有効化)</a></li>
+</ol>
+
+<h2><a name="gaiyou">概要</a></h2>
+<p>保護者/担任の先生はスマホ等から面談の予約/確認をすることができます。</p>
+<p>webサービスなので下記にアクセスすることでipadやPCからでも使えます。</p>
+<p>https://hatomochi.net:4001/</p>
+<p>使用の流れは下記です</p>
+<img src="images/howToUse000.png">
+<p>事前準備のやり方が分かりにくければ、管理者に聞いてください。</p>
+
+<h2><a name="rireki">更新履歴</a></h2>
+<ul>
+  <li>
+    ver.1.0 : 2023/5/7 担任が面談の日時の枠を設定する機能、予約を有効/無効にする機能実装
+  </li>
+  <li>
+    ver.0.9 : 2022/6/8 機能実装
+  </li>
+</ul>
+
+<h2><a name="howtoLogin">ログインするには</a></h2>
+<img src="images/howToUse001.png">
+<p>↓</p>
+<img src="images/howToUse002.png">
+<p>↓</p>
+<img src="images/howToUse003.png">
+
+<h2><a name="wakuset">面談の日時の枠を設定する</a></h2>
+<p>以下のような手順で設定します。
+  <ol>
+    <li>エクセルシートに日時の予約の枠の情報を入力</li>
+    <li>エクセルのマクロ「makeWaku」を実行することで、エクセルシートがあるフォルダに「yoyaku_waku.json」が生成される。</li>
+    <li>「yoyaku_waku.json」をメモ帳などのテキストエディタで開き、内容をすべて選択してコピーする。</li>
+    <li>本サービスにログインし、コピーした内容を「日時の枠の設定」にペーストして設定する。</li>
+  </ol>
+</p>
+<p>以下、手順を図解</p>
+
+手順１　エクセルシートを開き、内容を入力する
+<img src="images/howToUse004.png">
+<p>なお、office のバージョンによると思いますが、マクロの実行は「開発」タブ->「マクロ」で該当のものを選んで実行です。「開発」タブがない場合、「ファイル」タブ->「その他」->「オプション」->「リボンのユーザ設定」で追加できます。良くわからない人はエクセルファイルに内容を入力して管理者に渡してください。</p>
+<p>↓</p>
+<img src="images/howToUse004-2.png">
+<p>↓</p>
+<img src="images/howToUse005.png">
+<p>↓</p>
+<img src="images/howToUse006.png">
+<p>↓</p>
+<p>ログインしていなければ、ログインする</p>
+<p>↓</p>
+<img src="images/howToUse007.png">
+<p>↓</p>
+<img src="images/howToUse008.png">
+<p>↓</p>
+<img src="images/howToUse009.png">
+<p>↓</p>
+<img src="images/howToUse010.png">
+<p>↓</p>
+<img src="images/howToUse011.png">
+
+<h2><a name="parents">保護者の操作(予約)</a></h2>
+<p>注意：保護者が使い始める前に、担任の先生が面談の日時の枠を設定している必要があります。</p>
+<p>保護者はログインすると、枠が空いているか、埋まっているか○×で分かりますが、他の人が予約済なのか、教員が予約不可としているかは分かりません。</p>
+<img src="images/howToUse012.png">
+<p>↓</p>
+<img src="images/howToUse013.png">
+<p>↓</p>
+<img src="images/howToUse014.png">
+<p>↓</p>
+<img src="images/howToUse015.png">
+
+<h2><a name="parentsCancel">保護者の操作(予約キャンセル)</a></h2>
+<img src="images/howToUse016.png">
+<p>↓</p>
+<img src="images/howToUse017.png">
+<p>↓</p>
+<img src="images/howToUse018.png">
+<p>↓</p>
+<img src="images/howToUse019.png">
+
+<h2><a name="teacher">先生の操作(確認)</a></h2>
+<p>教員はログインすると、予約している人の名前を見られる。また、担任のクラスでまだ予約していない生徒の一覧が表の隣に表示される。</p>
+<img src="images/howToUse020.png">
+
+<h2><a name="teacherReserve">先生の操作(予約)</a></h2>
+<p>教員も保護者の操作と同じように、空いている枠をタップすると、その枠を予約できる。</p>
+<p>途中で都合が悪くなったところは自分で予約をいれて、保護者の予約を不可とする。</p>
+
+<h2><a name="teacherOff">先生の操作(予約機能の無効化)</a></h2>
+<p>面談の期間の直前にweb予約を打ち切りたいときは、担任が予約機能を停止できる。(再開もできる)</p>
+<img src="images/howToUse021.png">
+<p>↓</p>
+<img src="images/howToUse022.png">
+<p>↓</p>
+<img src="images/howToUse023.png">
+<p>↓</p>
+<img src="images/howToUse024.png">
+<p>↓</p>
+<img src="images/howToUse025.png">
+
+<h2><a name="teacherOn">先生の操作(予約機能の有効化)</a></h2>
+<p>無効化と同じような手順で再度有効化もできる。</p>
+<img src="images/howToUse026.png">
+
+<h1>本ページを書いた人</h1>
+<p>shirayanagi hiroshi</p>
+<p>2023/05/07</p>
+</body>
+</html>

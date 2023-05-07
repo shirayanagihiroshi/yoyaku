@@ -32,7 +32,7 @@ yoyaku.shell = (function () {
     },
     main_html : String()
       + '<div class="yoyaku-shell-head">'
-        + '<p>面談の日程 web予約</p>'
+        + '<p>面談の日程 web予約 ver.1.0</p>'
         + '<button class="yoyaku-shell-head-acct"></button>'
       + '</div>'
       + '<div class="yoyaku-shell-main">'
