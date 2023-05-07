@@ -3,7 +3,8 @@
  * シェルスタイル
  */
 .yoyaku-shell-head, .yoyaku-shell-head-title, .yoyaku-shell-head-acct,
-.yoyaku-shell-main, .yoyaku-shell-main-menu, .yoyaku-shell-main-content, .yoyaku-shell-dialog
+.yoyaku-shell-main, .yoyaku-shell-main-menu, .yoyaku-shell-main-content, .yoyaku-shell-dialog,
+.howtouse
 {
   position: absolute;
 }
@@ -45,6 +46,10 @@
 }
 
 
+.howtouse {
+  top    : 4px;
+  left   : 270px;
+}
 
 
 .yoyaku-shell-main {

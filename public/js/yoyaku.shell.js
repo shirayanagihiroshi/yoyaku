@@ -33,6 +33,7 @@ yoyaku.shell = (function () {
     main_html : String()
       + '<div class="yoyaku-shell-head">'
         + '<p>面談の日程 web予約 ver.1.0</p>'
+        + '<a href="https://shirayanagihiroshi.github.io/yoyaku/" class="howtouse">使い方はこちら(教員向け)</a>'
         + '<button class="yoyaku-shell-head-acct"></button>'
       + '</div>'
       + '<div class="yoyaku-shell-main">'
@@ -54,6 +55,7 @@ yoyaku.shell = (function () {
     jqueryMap = {
       $container : $container,
       $acct      : $container.find( '.yoyaku-shell-head-acct' ),
+      $howtouse  : $container.find( '.howtouse' ),
       $main      : $container.find( '.yoyaku-shell-main' )
     };
   }
@@ -285,6 +287,13 @@ yoyaku.shell = (function () {
       yoyaku.acct.configModule({showStr : msg_map.name});
       yoyaku.acct.initModule( jqueryMap.$acct );
 
+      // 教員には使い方のリンクをはる
+      if (yoyaku.model.iskyouin()) {
+        jqueryMap.$howtouse.css('display', 'block');
+      } else {
+        jqueryMap.$howtouse.css('display', 'none');
+      }
+
       changeAnchorPart({
         status : 'calendar'
       }, null, true); //ログイン前には戻したくないので、履歴を消去
@@ -315,6 +324,8 @@ yoyaku.shell = (function () {
       yoyaku.acct.configModule({showStr : "ログインする"});
       yoyaku.acct.initModule( jqueryMap.$acct );
       jqueryMap.$main.html( "" );
+
+      jqueryMap.$howtouse.css('display', 'none');
 
 
     changeAnchorPart({
@@ -455,6 +466,8 @@ yoyaku.shell = (function () {
 
     yoyaku.acct.configModule({showStr : 'ログインする'});
     yoyaku.acct.initModule( jqueryMap.$acct );
+
+    jqueryMap.$howtouse.css('display', 'none');
 
     $(window)
       .bind( 'hashchange', onHashchange )
