@@ -94,6 +94,11 @@ yoyaku.model = (function () {
       $.gevent.publish('deleteReserveResult', [{}]);
     });
 
+    // 削除失敗
+    yoyaku.data.registerReceive('deleteReserveResultFailure', function (msg) {
+      $.gevent.publish('deleteReserveResultFailure', [{}]);
+    });
+
 
     yoyaku.data.registerReceive('logoutResult', function (msg) {
       let eventName;

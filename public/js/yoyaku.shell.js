@@ -400,6 +400,17 @@ yoyaku.shell = (function () {
       });
     });
 
+    // 削除失敗ダイアログ
+    $.gevent.subscribe( $container, 'deleteReserveResultFailure', function (event, msg_map) {
+      stateMap.errStr = '予約を削除できませんでした。';
+      changeAnchorPart({
+        status : 'dialog',
+        _status : {
+          dialogKind : 'Updone'
+        }
+      });
+    });
+
     $.gevent.subscribe( $container, 'readyReserveDone', function (event, msg_map) {
       changeAnchorPart({
         status : 'calendar'

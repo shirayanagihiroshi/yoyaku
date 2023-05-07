@@ -126,16 +126,24 @@ io.on("connection", function (socket) {
             console.log("reserve already exist");
             io.to(socket.id).emit('updateReserveFailure', {}); // 送信者のみに送信
           } else {
-            db.updateDocument('yoyaku_reserve',
-                              {cls           : msg.cls,
-                               reserveTarget : msg.reserveTarget,
-                               userId        : msg.userId},
-                              {$set : {cls           : msg.cls,
-                                       reserveTarget : msg.reserveTarget,
-                                       userId        : msg.userId,
-                                       name          : msg.name}}, function (res) {
-              //console.log('updateSyukketsu done' + res);
-              io.to(socket.id).emit('updateReserveSuccess', res); // 送信者のみに送信
+
+            db.findManyDocuments('yoyaku_waku', {cls:msg.cls}, {projection:{_id:0}}, function (resKigenCheck) {
+              // 機能が有効なら登録する
+              if (resKigenCheck[0].nowusable == true) {
+                db.updateDocument('yoyaku_reserve',
+                                  {cls           : msg.cls,
+                                   reserveTarget : msg.reserveTarget,
+                                   userId        : msg.userId},
+                                  {$set : {cls           : msg.cls,
+                                           reserveTarget : msg.reserveTarget,
+                                           userId        : msg.userId,
+                                           name          : msg.name}}, function (res) {
+                  io.to(socket.id).emit('updateReserveSuccess', res); // 送信者のみに送信
+                });
+              // 機能が無効なら失敗とする
+              } else {
+                io.to(socket.id).emit('updateReserveFailure', {}); // 送信者のみに送信
+              }
             });
           }
         });
@@ -157,14 +165,22 @@ io.on("connection", function (socket) {
     db.findManyDocuments('yoyaku_user', {userId:msg.AKey.userId}, {projection:{_id:0}}, function (result) {
       // ログイン中のユーザにのみ回答
       if (result.length != 0 && msg.AKey.token == result[0].token ) {
-        db.deleteManyDocuments('yoyaku_reserve',
-                               {reserveTarget : msg.reserveTarget,
-                               cls            : msg.cls},
-                               function (res) {
 
-          //console.log('insertRenrakuResult done' + res);
-          io.to(socket.id).emit('deleteReserveResult', res); // 送信者のみに送信
+        db.findManyDocuments('yoyaku_waku', {cls:msg.cls}, {projection:{_id:0}}, function (resKigenCheck) {
+          // 機能が有効なら登録する
+          if (resKigenCheck[0].nowusable == true) {
+            db.deleteManyDocuments('yoyaku_reserve',
+                                   {reserveTarget : msg.reserveTarget,
+                                   cls            : msg.cls},
+                                   function (res) {
+              io.to(socket.id).emit('deleteReserveResult', res); // 送信者のみに送信
+            });
+          // 機能が無効なら失敗とする
+          } else {
+            io.to(socket.id).emit('deleteReserveResultFailure', {}); // 送信者のみに送信
+          }
         });
+
       } else {
         io.to(socket.id).emit('anotherLogin', {}); // 送信者のみに送信
       }
