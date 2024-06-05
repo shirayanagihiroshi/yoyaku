@@ -33,7 +33,7 @@ yoyaku.shell = (function () {
     main_html : String()
       + '<div class="yoyaku-shell-head">'
         + '<p>面談の日程 web予約 ver.1.0</p>'
-        + '<a href="https://shirayanagihiroshi.github.io/yoyaku/" class="howtouse">使い方はこちら(教員向け)</a>'
+        + '<a href="https://shirayanagihiroshi.github.io/yoyaku/" class="howtouse" target="_blank" rel="noopener noreferrer" >使い方はこちら(教員向け)</a>'
         + '<button class="yoyaku-shell-head-acct"></button>'
       + '</div>'
       + '<div class="yoyaku-shell-main">'
